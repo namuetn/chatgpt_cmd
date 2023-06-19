@@ -7,13 +7,17 @@ colorama==0.4.6
 exceptiongroup==1.1.1
 h11==0.14.0
 idna==3.4
+lxml==4.9.2
 numpy==1.24.3
 outcome==1.2.0
 packaging==23.1
 pandas==2.0.2
 pycparser==2.21
+pyfiglet==0.8.post1
+pyperclip==1.8.2
 PySocks==1.7.1
 python-dateutil==2.8.2
+python-docx==0.8.11
 python-dotenv==1.0.0
 pytz==2023.3
 requests==2.31.0

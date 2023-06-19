@@ -13,7 +13,7 @@ def login(driver):
         driver.get("https://chat.openai.com")
 
         cookies = pickle.load(open("cookies.pkl", "rb"))
-        print(cookies, 1)
+
         for cookie in cookies:
             cookie_domain = cookie['domain']
             if cookie_domain.startswith('.'):

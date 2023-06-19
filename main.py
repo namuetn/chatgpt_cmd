@@ -80,7 +80,7 @@ def chatgpt_crawler():
                 textarea.send_keys(question)
                 textarea.send_keys(Keys.ENTER)
 
-                button_copy = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="__next"]/div[1]/div[2]/div/main/div[2]/div/div/div//div[contains(., "{question}")]/following-sibling::div[1]/div/div[2]/div[2]/div/button')))
+                button_copy = WebDriverWait(driver, 23).until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="__next"]/div[1]/div[2]/div/main/div[2]/div/div/div//div[contains(., "{question}")]/following-sibling::div[1]/div/div[2]/div[2]/div/button')))
                 button_copy.click()
                 
                 answers.append(pyperclip.paste())

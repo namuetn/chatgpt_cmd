@@ -7,4 +7,3 @@ def setup_driver():
     driver = uc.Chrome()
 
     return driver
-

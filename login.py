@@ -1,9 +1,11 @@
-from setup import setup_driver
-import argparse
 from selenium.common.exceptions import NoSuchElementException
-from time import sleep
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from setup import setup_driver
+from time import sleep
+import argparse
 import getpass
 import pickle
 import os
@@ -19,8 +21,16 @@ def setup_command():
 def login(driver):
     args = setup_command()
 
-    if not os.path.exists(args.file) or not os.path.exists(args.output):
+    _, ext_input = os.path.splitext(args.file)
+    _, ext_output = os.path.splitext(args.output)
+    if not os.path.exists(args.file):
         print("Error: Tệp tin không tồn tại.")
+        exit(1)
+    elif ext_input.lower() != '.txt':
+        print(f"Error: Tệp tin phải có đuôi .txt")
+        exit(1)
+    elif ext_output.lower() != '.docx':
+        print(f"Error: Tệp tin phải có đuôi .docx")
         exit(1)
 
     if os.path.exists('cookies.pkl'):
@@ -34,7 +44,7 @@ def login(driver):
             #     cookie_domain = cookie_domain[1:]
 
             cookie_secure = cookie.get('secure', False)
-            cookie_http_only = cookie.get('httpOnly', False)            
+            cookie_http_only = cookie.get('httpOnly', False)
 
             driver.add_cookie({
                 'name': cookie['name'],
@@ -45,7 +55,7 @@ def login(driver):
                 'httpOnly': cookie_http_only,
                 'expiry': 1687749438,
             })
-        
+
         sleep(2)
         driver.get("https://chat.openai.com")
     else:
@@ -57,10 +67,9 @@ def login(driver):
 
         driver.get("https://chat.openai.com")
         driver.maximize_window() 
-        sleep(3)
 
         # find button login
-        log_in = driver.find_element(by=By.XPATH, value='//*[@id="__next"]/div[1]/div[1]/div[4]/button[1]')
+        log_in = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[1]/div[4]/button[1]')))
         log_in.send_keys(Keys.ENTER)
         sleep(3)
 
@@ -69,7 +78,6 @@ def login(driver):
         email = driver.find_element(by=By.ID, value="username")
         email.send_keys(email_input)
         email.send_keys(Keys.ENTER)
-        sleep(3)
 
         try:
             error_email_msg = driver.find_element(by=By.XPATH, value='//*[@id="error-element-username"]')
@@ -84,7 +92,6 @@ def login(driver):
         password = driver.find_element(by=By.ID, value="password")
         password.send_keys(password_input)
         password.send_keys(Keys.ENTER)
-        sleep(3)
 
         try:
             error_password_msg = driver.find_element(by=By.XPATH, value='//*[@id="error-element-password"]')

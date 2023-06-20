@@ -2,11 +2,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from time import sleep
 from setup import setup_driver
 from login import login
 from docx import Document
-import argparse
 import pyperclip
 import pyfiglet
 import os
@@ -24,7 +25,7 @@ def create_table_docx(questions, answers, output_path):
         row_cells = table.add_row().cells
         row_cells[0].text = question
         row_cells[1].text = answer
-    
+
     document.save(output_path)
 
 def chatgpt_crawler():
@@ -35,20 +36,18 @@ def chatgpt_crawler():
         args = login(driver)
 
         # skip modal
-        driver.get(driver.current_url)
-        sleep(3)
-        next_button = driver.find_element(by=By.XPATH, value='//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button')
+        sleep(1)
+        next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button')))
         next_button.click()
-        sleep(2)
-        next_button = driver.find_element(by=By.XPATH, value='//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')
+
+        next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
         next_button.click()
-        sleep(2)
-        next_button = driver.find_element(by=By.XPATH, value='//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')
+
+        next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
         next_button.click()
-        sleep(2)
 
         # add textarea
-        textarea = driver.find_element(by=By.ID, value='prompt-textarea')
+        textarea = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, 'prompt-textarea')))
 
         # read file
         _, ext = os.path.splitext(args.file)
@@ -71,15 +70,22 @@ def chatgpt_crawler():
                 textarea.send_keys(question)
                 textarea.send_keys(Keys.ENTER)
 
+                try:
+                    button_continue_generating = WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]')))
+                    button_continue_generating.click()
+                except NoSuchElementException:
+                    pass
+                except TimeoutException:
+                    pass
+
                 button_copy = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="__next"]/div[1]/div[2]/div/main/div[2]/div/div/div//div[contains(., "{question}")]/following-sibling::div[1]/div/div[2]/div[2]/div/button')))
                 button_copy.click()
-                
                 answers.append(pyperclip.paste())
 
             create_table_docx(questions=questions, answers=answers, output_path=args.output)
             print('Crawl thông tin thành công')
-            sleep(3)
-            
+            sleep(2)
+
     # except Exception as e:
     #     print(f"Có lỗi xảy ra: {e}")
     finally:

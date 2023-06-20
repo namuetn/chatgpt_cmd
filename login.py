@@ -1,4 +1,5 @@
-from setup_driver import setup_driver
+from setup import setup_driver
+import argparse
 from selenium.common.exceptions import NoSuchElementException
 from time import sleep
 from selenium.webdriver.common.by import By
@@ -7,17 +8,30 @@ import getpass
 import pickle
 import os
 
+def setup_command():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", "--file", help="File đầu vào", required=True)
+    parser.add_argument("-o", "--output", help="File đầu ra", required=True)
+    args = parser.parse_args()
+
+    return args
 
 def login(driver):
+    args = setup_command()
+
+    if not os.path.exists(args.file) or not os.path.exists(args.output):
+        print("Error: Tệp tin không tồn tại.")
+        exit(1)
+
     if os.path.exists('cookies.pkl'):
         driver.get("https://chat.openai.com")
 
         cookies = pickle.load(open("cookies.pkl", "rb"))
 
         for cookie in cookies:
-            cookie_domain = cookie['domain']
-            if cookie_domain.startswith('.'):
-                cookie_domain = cookie_domain[1:]
+            # cookie_domain = cookie['domain']
+            # if cookie_domain.startswith('.'):
+            #     cookie_domain = cookie_domain[1:]
 
             cookie_secure = cookie.get('secure', False)
             cookie_http_only = cookie.get('httpOnly', False)            
@@ -29,7 +43,7 @@ def login(driver):
                 'path': cookie['path'],
                 'secure': cookie_secure,
                 'httpOnly': cookie_http_only,
-                # 'expiry': expiry
+                'expiry': 1687749438,
             })
         
         sleep(2)
@@ -44,7 +58,6 @@ def login(driver):
         driver.get("https://chat.openai.com")
         driver.maximize_window() 
         sleep(3)
-        
 
         # find button login
         log_in = driver.find_element(by=By.XPATH, value='//*[@id="__next"]/div[1]/div[1]/div[4]/button[1]')
@@ -86,5 +99,4 @@ def login(driver):
         cookies = driver.get_cookies()
         pickle.dump(cookies, open("cookies.pkl", "wb"))
 
-def save_cookie(driver):
-    pass
+    return args

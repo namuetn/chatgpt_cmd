@@ -3,7 +3,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from time import sleep
-from setup_driver import setup_driver
+from setup import setup_driver
 from login import login
 from docx import Document
 import argparse
@@ -30,18 +30,9 @@ def create_table_docx(questions, answers, output_path):
 def chatgpt_crawler():
     ascii_banner = pyfiglet.figlet_format("ChatGPT Crawler")
     print(ascii_banner)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-f", "--file", help="File đầu vào", required=True)
-    parser.add_argument("-o", "--output", help="File đầu ra", required=True)
-    args = parser.parse_args()
-
-    if not os.path.exists(args.file):
-        print("Error: Tệp tin không tồn tại.")
-        exit(1)
     try:
         driver = setup_driver()
-        login(driver)
+        args = login(driver)
 
         # skip modal
         driver.get(driver.current_url)
@@ -86,8 +77,8 @@ def chatgpt_crawler():
                 answers.append(pyperclip.paste())
 
             create_table_docx(questions=questions, answers=answers, output_path=args.output)
-            print('Thành công')
-            sleep(10)
+            print('Crawl thông tin thành công')
+            sleep(3)
             
     # except Exception as e:
     #     print(f"Có lỗi xảy ra: {e}")

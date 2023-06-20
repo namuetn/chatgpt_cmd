@@ -1,4 +1,5 @@
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -39,10 +40,6 @@ def login(driver):
         cookies = pickle.load(open("cookies.pkl", "rb"))
 
         for cookie in cookies:
-            # cookie_domain = cookie['domain']
-            # if cookie_domain.startswith('.'):
-            #     cookie_domain = cookie_domain[1:]
-
             cookie_secure = cookie.get('secure', False)
             cookie_http_only = cookie.get('httpOnly', False)
 
@@ -69,9 +66,13 @@ def login(driver):
         driver.maximize_window() 
 
         # find button login
-        log_in = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[1]/div[4]/button[1]')))
-        log_in.send_keys(Keys.ENTER)
-        sleep(3)
+        try:
+            log_in = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[1]/div[4]/button[1]')))
+            log_in.send_keys(Keys.ENTER)
+            sleep(3)
+        except TimeoutException:
+            print('Quá thời gian login')
+            exit()
 
         # get and submit email
         driver.get(driver.current_url)

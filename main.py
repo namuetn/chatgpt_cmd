@@ -67,27 +67,30 @@ def chatgpt_crawler():
 
             answers = []
             for question in questions:
+                print(f'Question: {question}')
                 textarea.send_keys(question)
                 textarea.send_keys(Keys.ENTER)
 
                 try:
-                    button_continue_generating = WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]')))
+                    WebDriverWait(driver, 180).until(EC.invisibility_of_element_located((By.XPATH, '//div[contains(@class, "text-2xl")]')))
+                    # button_continue_generating = WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]')))
+                    button_continue_generating = driver.find_element(By.XPATH, '//*[@id="__next"]/div[1]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]')
                     button_continue_generating.click()
                 except NoSuchElementException:
                     pass
                 except TimeoutException:
                     pass
 
-                button_copy = WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="__next"]/div[1]/div[2]/div/main/div[2]/div/div/div//div[contains(., "{question}")]/following-sibling::div[1]/div/div[2]/div[2]/div/button')))
+                button_copy = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="__next"]/div[1]/div[2]/div/main/div[2]/div/div/div//div[contains(., "{question}")]/following-sibling::div[1]/div/div[2]/div[2]/div/button')))
+                driver.execute_script("arguments[0].scrollIntoView(true);", button_copy)
                 button_copy.click()
                 answers.append(pyperclip.paste())
 
             create_table_docx(questions=questions, answers=answers, output_path=args.output)
-            print('Crawl thông tin thành công')
-            sleep(2)
+            print('Success: Crawl thông tin thành công')
 
-    # except Exception as e:
-    #     print(f"Có lỗi xảy ra: {e}")
+    except Exception as e:
+        print(f"Có lỗi xảy ra: {e}")
     finally:
         if driver is not None:
             driver.quit()

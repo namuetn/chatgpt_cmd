@@ -1,2 +1,3 @@
-Ai là nhà sáng lập chatgpt
-Elon must là ai
+viết 1 đoạn văn 3000 từ tả mèo
+viết 1 câu văn 100 từ
+code hello world bằng python

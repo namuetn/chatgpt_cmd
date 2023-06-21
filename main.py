@@ -28,6 +28,18 @@ def create_table_docx(questions, answers, output_path):
 
     document.save(output_path)
 
+def remove_first_line(answer):
+    lines = answer.split('\n')
+
+    first_line = lines[0]
+    # Kiểm tra và loại bỏ dòng đầu tiên nếu chứa các từ "tóm tắt", "dưới đây" hoặc "sau đây"
+    if any(word in first_line.lower() for word in ["tóm tắt", "dưới đây", "sau đây", ":"]):
+        lines = lines[1:]
+
+    result = '\n'.join(lines)  # Kết hợp lại các dòng còn lại thành một đoạn văn bản
+
+    return result
+
 def chatgpt_crawler():
     ascii_banner = pyfiglet.figlet_format("ChatGPT Crawler")
     print(ascii_banner)
@@ -86,16 +98,8 @@ def chatgpt_crawler():
                 button_copy.click()
 
                 answer = pyperclip.paste()
-                lines = answer.split('\n')
-
-                first_line = lines[0]
-                # Kiểm tra và loại bỏ dòng đầu tiên nếu chứa các từ "tóm tắt", "dưới đây" hoặc "sau đây"
-                if any(word in first_line.lower() for word in ["tóm tắt", "dưới đây", "sau đây", ":"]):
-                    lines = lines[1:]
-
-                result = '\n'.join(lines)  # Kết hợp lại các dòng còn lại thành một đoạn văn bản
-
-                answers.append(result)
+                
+                answers.append(remove_first_line(answer=answer))
                 print("Thu thập thành công")
                 sleep(1)
 
@@ -103,8 +107,8 @@ def chatgpt_crawler():
             create_table_docx(questions=questions, answers=answers, output_path=args.output)
             print('Success: Crawl thông tin thành công')
 
-    # except Exception as e:
-    #     print(f"Có lỗi xảy ra: {e}")
+    except Exception as e:
+        print(f"Có lỗi xảy ra, vui lòng crawl lại")
     finally:
         if driver is not None:
             driver.quit()

@@ -34,20 +34,21 @@ def chatgpt_crawler():
     try:
         driver = setup_driver()
         args = login(driver)
+        print("Đăng nhập thành công")
 
         # skip modal
         sleep(1)
-        next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button')))
+        next_button = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button')))
         next_button.click()
 
-        next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
+        next_button = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
         next_button.click()
 
-        next_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
+        next_button = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
         next_button.click()
 
         # add textarea
-        textarea = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, 'prompt-textarea')))
+        textarea = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.ID, 'prompt-textarea')))
 
         # read file
         _, ext = os.path.splitext(args.file)
@@ -70,10 +71,9 @@ def chatgpt_crawler():
                 print(f'Question: {question}')
                 textarea.send_keys(question)
                 textarea.send_keys(Keys.ENTER)
-
+                print('Đang thu thập câu trả lời...')
                 try:
                     WebDriverWait(driver, 180).until(EC.invisibility_of_element_located((By.XPATH, '//div[contains(@class, "text-2xl")]')))
-                    # button_continue_generating = WebDriverWait(driver, 25).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]')))
                     button_continue_generating = driver.find_element(By.XPATH, '//*[@id="__next"]/div[1]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]')
                     button_continue_generating.click()
                 except NoSuchElementException:
@@ -84,13 +84,27 @@ def chatgpt_crawler():
                 button_copy = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, f'//*[@id="__next"]/div[1]/div[2]/div/main/div[2]/div/div/div//div[contains(., "{question}")]/following-sibling::div[1]/div/div[2]/div[2]/div/button')))
                 driver.execute_script("arguments[0].scrollIntoView(true);", button_copy)
                 button_copy.click()
-                answers.append(pyperclip.paste())
+
+                answer = pyperclip.paste()
+                lines = answer.split('\n')
+
+                first_line = lines[0]
+                # Kiểm tra và loại bỏ dòng đầu tiên nếu chứa các từ "tóm tắt", "dưới đây" hoặc "sau đây"
+                if any(word in first_line.lower() for word in ["tóm tắt", "dưới đây", "sau đây", ":"]):
+                    lines = lines[1:]
+
+                result = '\n'.join(lines)  # Kết hợp lại các dòng còn lại thành một đoạn văn bản
+
+                answers.append(result)
+                print("Thu thập thành công")
+                sleep(1)
+
 
             create_table_docx(questions=questions, answers=answers, output_path=args.output)
             print('Success: Crawl thông tin thành công')
 
-    except Exception as e:
-        print(f"Có lỗi xảy ra: {e}")
+    # except Exception as e:
+    #     print(f"Có lỗi xảy ra: {e}")
     finally:
         if driver is not None:
             driver.quit()

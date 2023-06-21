@@ -67,7 +67,7 @@ def login(driver):
 
         # find button login
         try:
-            log_in = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[1]/div[4]/button[1]')))
+            log_in = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="__next"]/div[1]/div[1]/div[4]/button[1]')))
             log_in.send_keys(Keys.ENTER)
             sleep(3)
         except TimeoutException:

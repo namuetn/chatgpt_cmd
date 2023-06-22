@@ -43,6 +43,7 @@ def remove_first_line(answer):
 def chatgpt_crawler():
     ascii_banner = pyfiglet.figlet_format("ChatGPT Crawler")
     print(ascii_banner)
+    print('                                               -- Created by Kieu Thanh Nam -- \n')
     try:
         driver = setup_driver()
         args = login(driver)
@@ -50,14 +51,17 @@ def chatgpt_crawler():
 
         # skip modal
         sleep(1)
-        next_button = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button')))
-        next_button.click()
+        try:
+            next_button = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button')))
+            next_button.click()
 
-        next_button = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
-        next_button.click()
+            next_button = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
+            next_button.click()
 
-        next_button = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
-        next_button.click()
+            next_button = WebDriverWait(driver, 15).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="radix-:r9:"]/div[2]/div[1]/div[2]/button[2]')))
+            next_button.click()
+        except TimeoutException:
+            driver.refresh()
 
         # add textarea
         textarea = WebDriverWait(driver, 180).until(EC.element_to_be_clickable((By.ID, 'prompt-textarea')))
@@ -83,7 +87,7 @@ def chatgpt_crawler():
                 print(f'Question: {question}')
                 textarea.send_keys(question)
                 textarea.send_keys(Keys.ENTER)
-                print('Đang thu thập câu trả lời...')
+                print('+ Đang thu thập câu trả lời...')
                 try:
                     WebDriverWait(driver, 180).until(EC.invisibility_of_element_located((By.XPATH, '//div[contains(@class, "text-2xl")]')))
                     button_continue_generating = driver.find_element(By.XPATH, '//*[@id="__next"]/div[1]/div[2]/div/main/div[3]/form/div/div[1]/div/button[2]')
@@ -98,9 +102,9 @@ def chatgpt_crawler():
                 button_copy.click()
 
                 answer = pyperclip.paste()
-                
+
                 answers.append(remove_first_line(answer=answer))
-                print("Thu thập thành công")
+                print("+ Thu thập thành công")
                 sleep(1)
 
 
